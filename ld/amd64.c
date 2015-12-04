@@ -274,6 +274,7 @@ _reserve_gotplt_entry(struct ld *ld, struct ld_symbol *lsb)
 
 	/* Reserve a GOT entry for PLT. */
 	off = ld_input_reserve_ibuf(is, 1);
+        off = off; /* unused */
 
 	/*
 	 * Record a R_X86_64_JUMP_SLOT entry for this symbol. Note that

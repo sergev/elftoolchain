@@ -259,6 +259,7 @@ _reserve_gotplt_entry(struct ld *ld, struct ld_symbol *lsb)
 
 	/* Reserve a GOT entry for PLT. */
 	off = ld_input_reserve_ibuf(is, 1);
+        off = off; /* unused */
 
 	/*
 	 * Record a R_386_JMP_SLOT entry for this symbol. Note that
@@ -606,7 +607,7 @@ i386_register(struct ld *ld)
 
 	if ((i386_arch = calloc(1, sizeof(*i386_arch))) == NULL)
 		ld_fatal_std(ld, "calloc");
-	
+
 	snprintf(i386_arch->name, sizeof(i386_arch->name), "%s", "i386");
 
 	i386_arch->script = i386_script;

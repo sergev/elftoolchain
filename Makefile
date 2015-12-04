@@ -31,11 +31,12 @@ SUBDIR += readelf
 SUBDIR += size
 SUBDIR += strings
 SUBDIR += tools
+SUBDIR += ld
 
 # Build the test suites.
-.if exists(${.CURDIR}/test) && defined(MKTESTS) && ${MKTESTS} == "yes"
-SUBDIR += test
-.endif
+#.if exists(${.CURDIR}/test) && defined(MKTESTS) && ${MKTESTS} == "yes"
+#SUBDIR += test
+#.endif
 
 # Build documentation at the end.
 .if exists(${.CURDIR}/documentation) && defined(MKDOC) && ${MKDOC} == "yes"

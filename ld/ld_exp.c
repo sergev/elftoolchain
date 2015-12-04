@@ -568,7 +568,7 @@ _func_alignof(struct ld *ld, struct ld_exp *le)
 static int64_t
 _func_data_segment_align(struct ld *ld, struct ld_exp *le)
 {
-	struct ld_state *ls; 
+	struct ld_state *ls;
 	uint64_t maxpagesize, commonpagesize;
 
 	/*
@@ -578,6 +578,7 @@ _func_data_segment_align(struct ld *ld, struct ld_exp *le)
 	ls = &ld->ld_state;
 	maxpagesize = _EXP_EVAL(le->le_e1);
 	commonpagesize = _EXP_EVAL(le->le_e2);
+	commonpagesize = commonpagesize; /* unused */
 
 	return (roundup(ls->ls_loc_counter, maxpagesize) +
 	    (ls->ls_loc_counter & (maxpagesize - 1)));

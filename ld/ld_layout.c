@@ -95,6 +95,7 @@ ld_layout_sections(struct ld *ld)
 	ls = &ld->ld_state;
 	lo = ld->ld_output;
 	lds = ld->ld_scp;
+	ls = ls; /* unused */
 
 	sections_cmd_exist = 0;
 	STAILQ_FOREACH(ldc, &lds->lds_c, ldc_next) {
