@@ -133,7 +133,7 @@ _reloc2str(uint64_t r)
 		case 22: return "R_X86_64_GOTTPOFF";
 		case 23: return "R_X86_64_TPOFF32";
 	default:
-		snprintf(s, sizeof(s), "<unkown: %ju>", r);
+		snprintf(s, sizeof(s), "<unkown: %ju>", (uintmax_t)r);
 		return (s);
 	}
 }
@@ -268,13 +268,12 @@ static void
 _reserve_gotplt_entry(struct ld *ld, struct ld_symbol *lsb)
 {
 	struct ld_input_section *is;
-	uint64_t off;
+	//uint64_t off;
 
 	is = _find_and_create_gotplt_section(ld, 1);
 
 	/* Reserve a GOT entry for PLT. */
-	off = ld_input_reserve_ibuf(is, 1);
-        off = off; /* unused */
+	//off = ld_input_reserve_ibuf(is, 1);
 
 	/*
 	 * Record a R_X86_64_JUMP_SLOT entry for this symbol. Note that

@@ -15,7 +15,7 @@ LIBELFTC?=	${TOP}/libelftc
 
 BINDIR?=	/usr/bin
 
-CFLAGS+=	-I. -I${.CURDIR} -I${TOP}/common
+CFLAGS+=	-I. -I${.CURDIR} -I${TOP}/common -Wall -Werror
 CLEANFILES+=	.depend
 
 .if defined(LDADD)

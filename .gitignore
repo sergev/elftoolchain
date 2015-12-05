@@ -1,6 +1,13 @@
 *.o
 *.po
 *.a
+*.so
+*.d
+*.cat1
+*.cat3
+*.cat5
+*.dylib
+.depend
 addr2line/addr2line
 ar/acplex.c
 ar/acpyacc.c
@@ -27,6 +34,7 @@ ld/ld
 ld/ld_script_lexer.c
 ld/ld_script_parser.c
 ld/y.tab.h
+ld/y.tab.c
 libdwarf/dwarf_funcs.c
 libdwarf/dwarf_pro_funcs.c
 libdwarf/dwarf_pro_pubnames.c

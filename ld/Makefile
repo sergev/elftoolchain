@@ -37,14 +37,17 @@ SRCS=	amd64.c			\
 .ld.c:
 	awk -f ld_script.awk ${.ALLSRC} > ${.TARGET}
 
+ld_script_lexer.l: ld_script_parser.o
+
 GENSRCS=	amd64_script.c i386_script.c mips_script.c
 
-CLEANFILES+=	y.tab.h ${GENSRCS}
+CLEANFILES+=	${GENSRCS}
 
 DPADD=	${LIBELFTC} ${LIBELF} ${LIBDWARF}
 LDADD=	-lelftc -ldwarf -lelf
 
 CFLAGS+= -I. -I${.CURDIR}
+YFLAGS=	-d
 
 NOMAN=
 

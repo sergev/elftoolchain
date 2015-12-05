@@ -89,13 +89,12 @@ ld_layout_sections(struct ld *ld)
 	struct ld_output *lo;
 	struct ld_script *lds;
 	struct ld_script_cmd *ldc;
-	struct ld_state *ls;
+	//struct ld_state *ls;
 	int sections_cmd_exist;
 
-	ls = &ld->ld_state;
+	//ls = &ld->ld_state;
 	lo = ld->ld_output;
 	lds = ld->ld_scp;
-	ls = ls; /* unused */
 
 	sections_cmd_exist = 0;
 	STAILQ_FOREACH(ldc, &lds->lds_c, ldc_next) {
@@ -271,10 +270,10 @@ _print_section_layout(struct ld *ld, struct ld_output_section *os)
 				printf(" %-14s", is->is_name);
 				if (lo->lo_ec == ELFCLASS32)
 					printf(" 0x%08jx", (uintmax_t)
-					    os->os_addr + is->is_reloff);
+					    (os->os_addr + is->is_reloff));
 				else
 					printf(" 0x%016jx", (uintmax_t)
-					    os->os_addr + is->is_reloff);
+					    (os->os_addr + is->is_reloff));
 				if (is->is_size == 0)
 					printf(" %10s", "0x0");
 				else
