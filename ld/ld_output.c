@@ -916,7 +916,8 @@ ld_output_create(struct ld *ld)
 	ld_input_alloc_internal_section_buffers(ld);
 
 	/* Finalize PLT and GOT sections. */
-	ld->ld_arch->finalize_got_and_plt(ld);
+	if (ld->ld_arch->finalize_got_and_plt)
+		ld->ld_arch->finalize_got_and_plt(ld);
 
 	/* Join and sort dynamic relocation sections. */
 	_join_and_finalize_dynamic_reloc_sections(ld, lo);

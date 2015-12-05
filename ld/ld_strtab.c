@@ -56,7 +56,7 @@ ld_strtab_alloc(struct ld *ld, unsigned char suffix)
 
 	if ((st = calloc(1, sizeof(*st))) == NULL)
 		ld_fatal_std(ld, "calloc");
-	
+
 	st->st_size = 0;
 	if (suffix) {
 		st->st_suffix = 1;
@@ -78,9 +78,6 @@ ld_strtab_free(struct ld_strtab *st)
 	if (st == NULL)
 		return;
 
-	free(st->st_buf);
-	free(st);
-
 	if (st->st_pool != NULL) {
 		HASH_ITER(hh, st->st_pool, str, tmp) {
 			HASH_DELETE(hh, st->st_pool, str);
@@ -88,6 +85,8 @@ ld_strtab_free(struct ld_strtab *st)
 			free(str);
 		}
 	}
+	free(st->st_buf);
+	free(st);
 }
 
 char *
