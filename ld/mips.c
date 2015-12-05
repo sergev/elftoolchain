@@ -36,34 +36,6 @@
 
 ELFTC_VCSID("$Id$");
 
-static void _create_plt_reloc(struct ld *ld, struct ld_symbol *lsb,
-    uint64_t offset);
-static void _create_got_reloc(struct ld *ld, struct ld_symbol *lsb,
-    uint64_t type, uint64_t offset);
-static void _create_copy_reloc(struct ld *ld, struct ld_symbol *lsb);
-static void _create_dynamic_reloc(struct ld *ld, struct ld_input_section *is,
-    struct ld_symbol *lsb, uint64_t type, uint64_t offset);
-static void _scan_reloc(struct ld *ld, struct ld_input_section *is,
-    struct ld_reloc_entry *lre);
-static struct ld_input_section *_find_and_create_got_section(struct ld *ld,
-    int create);
-static struct ld_input_section *_find_and_create_gotplt_section(struct ld *ld,
-    int create);
-static struct ld_input_section *_find_and_create_plt_section(struct ld *ld,
-    int create);
-static uint64_t _get_max_page_size(struct ld *ld);
-static uint64_t _get_common_page_size(struct ld *ld);
-static void _process_reloc(struct ld *ld, struct ld_input_section *is,
-    struct ld_reloc_entry *lre, struct ld_symbol *lsb, uint8_t *buf);
-static const char *_reloc2str(uint64_t r);
-static void _reserve_got_entry(struct ld *ld, struct ld_symbol *lsb, int num);
-static void _reserve_gotplt_entry(struct ld *ld, struct ld_symbol *lsb);
-static void _reserve_plt_entry(struct ld *ld, struct ld_symbol *lsb);
-static int _is_absolute_reloc(uint64_t r);
-static int _is_relative_reloc(uint64_t r);
-static void _warn_pic(struct ld *ld, struct ld_reloc_entry *lre);
-static uint32_t _got_offset(struct ld *ld, struct ld_symbol *lsb);
-
 static uint64_t
 _get_max_page_size(struct ld *ld)
 {
@@ -80,70 +52,77 @@ _get_common_page_size(struct ld *ld)
 	return (0x1000);
 }
 
+#if 0
 static const char *
 _reloc2str(uint64_t r)
 {
 	static char s[32];
 
 	switch (r) {
-		case 0: return "R_386_NONE";
-		case 1: return "R_386_32";
-		case 2: return "R_386_PC32";
-		case 3: return "R_386_GOT32";
-		case 4: return "R_386_PLT32";
-		case 5: return "R_386_COPY";
-		case 6: return "R_386_GLOB_DAT";
-		case 7: return "R_386_JMP_SLOT";
-		case 8: return "R_386_RELATIVE";
-		case 9: return "R_386_GOTOFF";
-		case 10: return "R_386_GOTPC";
-		case 14: return "R_386_TLS_TPOFF";
-		case 15: return "R_386_TLS_IE";
-		case 16: return "R_386_TLS_GOTI";
-		case 17: return "R_386_TLS_LE";
-		case 18: return "R_386_TLS_GD";
-		case 19: return "R_386_TLS_LDM";
-		case 24: return "R_386_TLS_GD_32";
-		case 25: return "R_386_TLS_GD_PUSH";
-		case 26: return "R_386_TLS_GD_CALL";
-		case 27: return "R_386_TLS_GD_POP";
-		case 28: return "R_386_TLS_LDM_32";
-		case 29: return "R_386_TLS_LDM_PUSH";
-		case 30: return "R_386_TLS_LDM_CALL";
-		case 31: return "R_386_TLS_LDM_POP";
-		case 32: return "R_386_TLS_LDO_32";
-		case 33: return "R_386_TLS_IE_32";
-		case 34: return "R_386_TLS_LE_32";
-		case 35: return "R_386_TLS_DTPMOD32";
-		case 36: return "R_386_TLS_DTPOFF32";
-		case 37: return "R_386_TLS_TPOFF32";
+	case 0: return "R_386_NONE";
+	case 1: return "R_386_32";
+	case 2: return "R_386_PC32";
+	case 3: return "R_386_GOT32";
+	case 4: return "R_386_PLT32";
+	case 5: return "R_386_COPY";
+	case 6: return "R_386_GLOB_DAT";
+	case 7: return "R_386_JMP_SLOT";
+	case 8: return "R_386_RELATIVE";
+	case 9: return "R_386_GOTOFF";
+	case 10: return "R_386_GOTPC";
+	case 14: return "R_386_TLS_TPOFF";
+	case 15: return "R_386_TLS_IE";
+	case 16: return "R_386_TLS_GOTI";
+	case 17: return "R_386_TLS_LE";
+	case 18: return "R_386_TLS_GD";
+	case 19: return "R_386_TLS_LDM";
+	case 24: return "R_386_TLS_GD_32";
+	case 25: return "R_386_TLS_GD_PUSH";
+	case 26: return "R_386_TLS_GD_CALL";
+	case 27: return "R_386_TLS_GD_POP";
+	case 28: return "R_386_TLS_LDM_32";
+	case 29: return "R_386_TLS_LDM_PUSH";
+	case 30: return "R_386_TLS_LDM_CALL";
+	case 31: return "R_386_TLS_LDM_POP";
+	case 32: return "R_386_TLS_LDO_32";
+	case 33: return "R_386_TLS_IE_32";
+	case 34: return "R_386_TLS_LE_32";
+	case 35: return "R_386_TLS_DTPMOD32";
+	case 36: return "R_386_TLS_DTPOFF32";
+	case 37: return "R_386_TLS_TPOFF32";
 
 	default:
 		snprintf(s, sizeof(s), "<unkown: %ju>", r);
 		return (s);
 	}
 }
+#endif
 
 static int
 _is_absolute_reloc(uint64_t r)
 {
-
+	//TODO
+	printf("--- %s() not implemented yet\n", __func__);
+#if 0
 	if (r == R_386_32)
 		return (1);
-
+#endif
 	return (0);
 }
 
 static int
 _is_relative_reloc(uint64_t r)
 {
-
+	//TODO
+	printf("--- %s() not implemented yet\n", __func__);
+#if 0
 	if (r == R_386_RELATIVE)
 		return (1);
-
+#endif
 	return (0);
 }
 
+#if 0
 static void
 _warn_pic(struct ld *ld, struct ld_reloc_entry *lre)
 {
@@ -250,6 +229,15 @@ _reserve_got_entry(struct ld *ld, struct ld_symbol *lsb, int num)
 }
 
 static void
+_create_plt_reloc(struct ld *ld, struct ld_symbol *lsb, uint64_t offset)
+{
+	ld_reloc_create_entry(ld, ".rel.plt", NULL, R_386_JMP_SLOT,
+	    lsb, offset, 0);
+
+	lsb->lsb_dynrel = 1;
+}
+
+static void
 _reserve_gotplt_entry(struct ld *ld, struct ld_symbol *lsb)
 {
 	struct ld_input_section *is;
@@ -262,14 +250,16 @@ _reserve_gotplt_entry(struct ld *ld, struct ld_symbol *lsb)
         off = off; /* unused */
 
 	/*
-	 * Record a R_386_JMP_SLOT entry for this symbol. Note that
+	 * Record a JMP_SLOT entry for this symbol. Note that
 	 * we don't need to record the offset (relative to the GOT section)
 	 * here, since the PLT relocations will be sorted later and we
 	 * will generate GOT section according to the new order.
 	 */
 	_create_plt_reloc(ld, lsb, 0);
 }
+#endif
 
+#if 0
 static void
 _reserve_plt_entry(struct ld *ld, struct ld_symbol *lsb)
 {
@@ -279,16 +269,6 @@ _reserve_plt_entry(struct ld *ld, struct ld_symbol *lsb)
 
 	(void) ld_input_reserve_ibuf(is, 1);
 	lsb->lsb_plt = 1;
-}
-
-static void
-_create_plt_reloc(struct ld *ld, struct ld_symbol *lsb, uint64_t offset)
-{
-
-	ld_reloc_create_entry(ld, ".rel.plt", NULL, R_386_JMP_SLOT,
-	    lsb, offset, 0);
-
-	lsb->lsb_dynrel = 1;
 }
 
 static void
@@ -346,16 +326,20 @@ _create_dynamic_reloc(struct ld *ld, struct ld_input_section *is,
 	if (type != R_386_RELATIVE)
 		lsb->lsb_dynrel = 1;
 }
+#endif
 
 static void
 _scan_reloc(struct ld *ld, struct ld_input_section *is,
     struct ld_reloc_entry *lre)
 {
-	struct ld_symbol *lsb;
+	//struct ld_symbol *lsb;
 
-	lsb = ld_symbols_ref(lre->lre_sym);
+	//lsb = ld_symbols_ref(lre->lre_sym);
 
+	//TODO
+	printf("--- %s() not implemented yet\n", __func__);
 	switch (lre->lre_type) {
+#if 0
 	case R_386_NONE:
 		break;
 
@@ -508,7 +492,7 @@ _scan_reloc(struct ld *ld, struct ld_input_section *is,
 				_create_got_reloc(ld, lsb, R_386_RELATIVE,
 				    lsb->lsb_got_off);
 		}
-
+#endif
 	default:
 		ld_warn(ld, "can not handle relocation %ju",
 		    lre->lre_type);
@@ -516,6 +500,7 @@ _scan_reloc(struct ld *ld, struct ld_input_section *is,
 	}
 }
 
+#if 0
 static uint32_t
 _got_offset(struct ld *ld, struct ld_symbol *lsb)
 {
@@ -532,11 +517,13 @@ _got_offset(struct ld *ld, struct ld_symbol *lsb)
 
 	return (os->os_addr + ld->ld_got->is_reloff + lsb->lsb_got_off);
 }
+#endif
 
 static void
 _process_reloc(struct ld *ld, struct ld_input_section *is,
     struct ld_reloc_entry *lre, struct ld_symbol *lsb, uint8_t *buf)
 {
+#if 0
 	struct ld_state *ls;
 	struct ld_output *lo;
 	uint32_t p, s, l, g, got;
@@ -552,8 +539,11 @@ _process_reloc(struct ld *ld, struct ld_input_section *is,
 	got = ld->ld_got->is_output->os_addr;
 	s = (uint32_t) lsb->lsb_value;
 	READ_32(buf + lre->lre_offset, a);
-
+#endif
+	//TODO
+	printf("--- %s() not implemented yet\n", __func__);
 	switch (lre->lre_type) {
+#if 0
 	case R_386_NONE:
 		break;
 
@@ -593,7 +583,7 @@ _process_reloc(struct ld *ld, struct ld_input_section *is,
 		v = got + a - p;
 		WRITE_32(buf + lre->lre_offset, v);
 		break;
-
+#endif
 	default:
 		ld_fatal(ld, "Relocation %d not supported", lre->lre_type);
 		break;
@@ -613,7 +603,7 @@ mips_register(struct ld *ld)
 	/*
 	 * Little endian.
 	 */
-	snprintf(mips_little_endian->name, sizeof(mips_little_endian->name), "%s", "tradlittlemips");
+	snprintf(mips_little_endian->name, sizeof(mips_little_endian->name), "%s", "littlemips");
 
 	mips_little_endian->script = mips_script;
 	mips_little_endian->get_max_page_size = _get_max_page_size;
@@ -629,7 +619,7 @@ mips_register(struct ld *ld)
 	/*
 	 * Big endian.
 	 */
-	snprintf(mips_big_endian->name, sizeof(mips_big_endian->name), "%s", "tradbigmips");
+	snprintf(mips_big_endian->name, sizeof(mips_big_endian->name), "%s", "bigmips");
 
 	mips_big_endian->script = mips_script;
 	mips_big_endian->get_max_page_size = _get_max_page_size;

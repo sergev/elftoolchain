@@ -59,7 +59,7 @@ struct ld_arch {
 void	ld_arch_init(struct ld *);
 int	ld_arch_equal(struct ld_arch *, struct ld_arch *);
 struct ld_arch *ld_arch_find(struct ld *, char *);
-struct ld_arch *ld_arch_guess_arch_name(struct ld *, int);
+struct ld_arch *ld_arch_guess_arch_name(struct ld *, int, int);
 void	ld_arch_set(struct ld *, char *);
 void	ld_arch_set_from_target(struct ld *);
-void	ld_arch_verify(struct ld *, const char *, int);
+void	ld_arch_verify(struct ld *, const char *, int, int);

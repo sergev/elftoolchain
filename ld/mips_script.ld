@@ -1,12 +1,11 @@
 /* $Id$ */
 
-OUTPUT_FORMAT("elf32-tradbigmips", "elf32-tradbigmips", "elf32-tradlittlemips")
-OUTPUT_ARCH(mips)
+OUTPUT_FORMAT("elf32-littlemips")
 ENTRY(_start)
 SEARCH_DIR("/lib"); SEARCH_DIR("/usr/lib");
 SECTIONS {
-	 PROVIDE (__executable_start = 0x00400000);
-	 . = 0x00400000 + SIZEOF_HEADERS;
+	PROVIDE (__executable_start = 0x00400000);
+	. = 0x00400000 + SIZEOF_HEADERS;
 	.interp		: { *(.interp) }
 	.hash		: { *(.hash) }
 	.dynsym		: { *(.dynsym) }
