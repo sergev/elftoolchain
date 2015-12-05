@@ -29,13 +29,15 @@ SRCS=	amd64.c			\
 	ld_strtab.c		\
 	ld_symbols.c		\
 	ld_symver.c		\
+	mips.c			\
+	mips_script.c		\
 	y.tab.h
 
 .SUFFIXES:	.ld .c
 .ld.c:
 	awk -f ld_script.awk ${.ALLSRC} > ${.TARGET}
 
-GENSRCS=	amd64_script.c i386_script.c
+GENSRCS=	amd64_script.c i386_script.c mips_script.c
 
 CLEANFILES+=	y.tab.h ${GENSRCS}
 

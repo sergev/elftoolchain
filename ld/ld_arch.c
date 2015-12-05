@@ -28,6 +28,7 @@
 #include "ld_arch.h"
 #include "i386.h"
 #include "amd64.h"
+#include "mips.h"
 
 ELFTC_VCSID("$Id$");
 
@@ -48,6 +49,7 @@ ld_arch_init(struct ld *ld)
 
 	i386_register(ld);
 	amd64_register(ld);
+	mips_register(ld);
 
 	/*
 	 * Find out default arch for output object.
