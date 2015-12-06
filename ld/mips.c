@@ -34,6 +34,27 @@
 #include "ld_utils.h"
 #include "mips.h"
 
+#define EF_MIPS_ABI2		0x00000020	/* n32 abi */
+#define EF_MIPS_ABI		0x00007000	/* Application binary interface */
+#define E_MIPS_ABI_O32		0x00001000	/* MIPS 32 bit ABI (UCODE) */
+#define E_MIPS_ABI_O64		0x00002000	/* UCODE MIPS 64 bit ABI */
+#define E_MIPS_ABI_EABI32	0x00003000	/* Embedded ABI for 32-bit */
+#define E_MIPS_ABI_EABI64	0x00004000	/* Embedded ABI for 64-bit */
+
+#define EF_MIPS_ASE_MDMX	0x08000000	/* MDMX multimedia extensions */
+#define EF_MIPS_ASE_M16		0x04000000	/* MIPS16e ISA extensions */
+#define EF_MIPS_ASE_MICROMIPS	0x02000000	/* MicroMIPS architecture */
+
+#define EF_MIPS_ARCH_1		0x00000000	/* MIPS I instruction set */
+#define EF_MIPS_ARCH_2		0x10000000	/* MIPS II instruction set */
+#define EF_MIPS_ARCH_3		0x20000000	/* MIPS III instruction set */
+#define EF_MIPS_ARCH_4		0x30000000	/* MIPS IV instruction set */
+#define EF_MIPS_ARCH_5		0x40000000	/* Never introduced */
+#define EF_MIPS_ARCH_32		0x50000000	/* Mips32 Revision 1 */
+#define EF_MIPS_ARCH_64		0x60000000	/* Mips64 Revision 1 */
+#define EF_MIPS_ARCH_32R2	0x70000000	/* Mips32 Revision 2 */
+#define EF_MIPS_ARCH_64R2	0x80000000	/* Mips64 Revision 2 */
+
 ELFTC_VCSID("$Id$");
 
 static void
@@ -102,6 +123,168 @@ _process_reloc(struct ld *ld, struct ld_input_section *is,
 	}
 }
 
+/*
+ * Map flags into a valid MIPS architecture level value.
+ */
+static unsigned
+_map_arch(unsigned flags)
+{
+	flags &= EF_MIPS_ARCH;
+
+	switch (flags) {
+	default:
+	case EF_MIPS_ARCH_1:
+		return EF_MIPS_ARCH_1;
+	case EF_MIPS_ARCH_2:
+	case EF_MIPS_ARCH_3:
+	case EF_MIPS_ARCH_4:
+	case EF_MIPS_ARCH_5:
+	case EF_MIPS_ARCH_32:
+	case EF_MIPS_ARCH_64:
+	case EF_MIPS_ARCH_32R2:
+	case EF_MIPS_ARCH_64R2:
+		return flags;
+	}
+}
+
+/*
+ * Merge architecture levels of two files.
+ */
+static unsigned
+_merge_arch(unsigned old_arch, unsigned new_arch)
+{
+	unsigned base, extended;
+
+	if (old_arch < new_arch) {
+		base = old_arch;
+		extended = new_arch;
+	} else if (old_arch > new_arch) {
+		base = new_arch;
+		extended = old_arch;
+	} else
+		return old_arch;
+
+	switch (extended) {
+	default:
+	case EF_MIPS_ARCH_1:
+	case EF_MIPS_ARCH_2:
+	case EF_MIPS_ARCH_3:
+	case EF_MIPS_ARCH_4:
+	case EF_MIPS_ARCH_5:
+		return extended;
+
+	case EF_MIPS_ARCH_32:
+		if (base <= EF_MIPS_ARCH_2)
+			return EF_MIPS_ARCH_32;
+		return EF_MIPS_ARCH_64;
+
+	case EF_MIPS_ARCH_64:
+		return EF_MIPS_ARCH_64;
+
+	case EF_MIPS_ARCH_32R2:
+		if (base <= EF_MIPS_ARCH_2 || base == EF_MIPS_ARCH_32)
+			return EF_MIPS_ARCH_32R2;
+		return EF_MIPS_ARCH_64R2;
+
+	case EF_MIPS_ARCH_64R2:
+		return EF_MIPS_ARCH_64R2;
+	}
+}
+
+static const char*
+_abi_name(int flags)
+{
+	switch (flags & EF_MIPS_ABI) {
+	case 0:
+		return (flags & EF_MIPS_ABI2) ? "N32" : "none";
+	case E_MIPS_ABI_O32:
+		return "O32";
+	case E_MIPS_ABI_O64:
+		return "O64";
+	case E_MIPS_ABI_EABI32:
+		return "EABI32";
+	case E_MIPS_ABI_EABI64:
+		return "EABI64";
+	default:
+		return "Unknown";
+    }
+}
+
+/*
+ * Merge options of application binary interface.
+ */
+static unsigned
+_merge_abi(struct ld *ld, unsigned new_flags)
+{
+	int old = ld->ld_arch->flags & EF_MIPS_ABI;
+	int new = new_flags & EF_MIPS_ABI;
+
+	if (old == 0)
+		return new;
+
+	if (new != old && new != 0)
+		ld_fatal(ld, "ABI mismatch: linking '%s' module with previous '%s' modules",
+			_abi_name(new_flags), _abi_name(ld->ld_arch->flags));
+
+	return old;
+}
+
+/*
+ * Merge options of application-specific extensions.
+ */
+static unsigned
+_merge_ase(struct ld *ld, unsigned new_flags)
+{
+	int old_micro = ld->ld_arch->flags & EF_MIPS_ASE_MICROMIPS;
+	int new_micro = new_flags & EF_MIPS_ASE_MICROMIPS;
+	int old_m16 = ld->ld_arch->flags & EF_MIPS_ASE_M16;
+	int new_m16 = new_flags & EF_MIPS_ASE_M16;
+
+	if ((old_m16 && new_micro) || (old_micro && new_m16))
+		ld_fatal(ld, "ASE mismatch: linking '%s' module with previous '%s' modules",
+			new_m16 ? "MIPS16" : "microMIPS",
+			old_micro ? "microMIPS" : "MIPS16");
+	return old_micro | new_micro | old_m16 | new_m16;
+}
+
+/*
+ * Merge architecture-specific flags of the file to be linked
+ * into a resulting value for output file.
+ */
+static void
+_merge_flags(struct ld *ld, unsigned new_flags)
+{
+	struct ld_arch *la = ld->ld_arch;
+	unsigned value;
+
+	/* At least one .noreorder directive appeared in the source. */
+	la->flags |= new_flags & EF_MIPS_NOREORDER;
+
+	/* Merge position-independent flags. */
+	if (((new_flags & (EF_MIPS_PIC | EF_MIPS_CPIC)) != 0) !=
+	    ((la->flags & (EF_MIPS_PIC | EF_MIPS_CPIC)) != 0))
+		ld_warn(ld, "linking PIC files with non-PIC files");
+	if (new_flags & (EF_MIPS_PIC | EF_MIPS_CPIC))
+		la->flags |= EF_MIPS_CPIC;
+	if (! (new_flags & EF_MIPS_PIC))
+		la->flags &= ~EF_MIPS_PIC;
+
+	/* Merge architecture level. */
+	value = _merge_arch(_map_arch(la->flags), _map_arch(new_flags));
+	la->flags &= ~EF_MIPS_ARCH;
+	la->flags |= value;
+
+	/* Merge ABI options. */
+	value = _merge_abi(ld, new_flags);
+	la->flags &= ~EF_MIPS_ABI;
+	la->flags |= value;
+
+	/* Merge application-specific extensions. */
+	value = _merge_ase(ld, new_flags);
+	la->flags &= ~EF_MIPS_ARCH_ASE;
+	la->flags |= value;
+}
+
 static uint64_t
 _get_max_page_size(struct ld *ld)
 {
@@ -147,13 +330,14 @@ mips_register(struct ld *ld)
 	 */
 	snprintf(mips_little_endian->name, sizeof(mips_little_endian->name), "%s", "littlemips");
 
-	mips_little_endian->script = mips_script;
+	mips_little_endian->script = littlemips_script;
 	mips_little_endian->get_max_page_size = _get_max_page_size;
 	mips_little_endian->get_common_page_size = _get_common_page_size;
 	mips_little_endian->scan_reloc = _scan_reloc;
 	mips_little_endian->process_reloc = _process_reloc;
 	mips_little_endian->is_absolute_reloc = _is_absolute_reloc;
 	mips_little_endian->is_relative_reloc = _is_relative_reloc;
+	mips_little_endian->merge_flags = _merge_flags;
 	mips_little_endian->reloc_is_64bit = 0;
 	mips_little_endian->reloc_is_rela = 0;
 	mips_little_endian->reloc_entsize = sizeof(Elf32_Rel);
@@ -163,13 +347,14 @@ mips_register(struct ld *ld)
 	 */
 	snprintf(mips_big_endian->name, sizeof(mips_big_endian->name), "%s", "bigmips");
 
-	mips_big_endian->script = mips_script;
+	mips_big_endian->script = bigmips_script;
 	mips_big_endian->get_max_page_size = _get_max_page_size;
 	mips_big_endian->get_common_page_size = _get_common_page_size;
 	mips_big_endian->scan_reloc = _scan_reloc;
 	mips_big_endian->process_reloc = _process_reloc;
 	mips_big_endian->is_absolute_reloc = _is_absolute_reloc;
 	mips_big_endian->is_relative_reloc = _is_relative_reloc;
+	mips_little_endian->merge_flags = _merge_flags;
 	mips_big_endian->reloc_is_64bit = 0;
 	mips_big_endian->reloc_is_rela = 0;
 	mips_big_endian->reloc_entsize = sizeof(Elf32_Rel);

@@ -114,7 +114,8 @@ ld_arch_equal(struct ld_arch *a1, struct ld_arch *a2)
 }
 
 void
-ld_arch_verify(struct ld *ld, const char *name, int mach, int endian)
+ld_arch_verify(struct ld *ld, const char *name, int mach, int endian,
+	unsigned flags)
 {
 	struct ld_arch *la;
 	struct ld_state *ls;
@@ -133,6 +134,12 @@ ld_arch_verify(struct ld *ld, const char *name, int mach, int endian)
 			    "conflicts with output object architecture `%s'",
 			    name, la->name, ld->ld_arch->name);
 		ld->ld_arch = la;
+	}
+
+	if (ls->ls_first_elf_object) {
+		la->flags = flags;
+	} else if (la->merge_flags) {
+		la->merge_flags(ld, flags);
 	}
 
 	ls->ls_first_elf_object = 0;

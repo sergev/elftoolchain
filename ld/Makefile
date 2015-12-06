@@ -30,7 +30,8 @@ SRCS=	amd64.c			\
 	ld_symbols.c		\
 	ld_symver.c		\
 	mips.c			\
-	mips_script.c		\
+	littlemips_script.c	\
+	bigmips_script.c	\
 	y.tab.h
 
 .SUFFIXES:	.ld .c
@@ -39,7 +40,7 @@ SRCS=	amd64.c			\
 
 ld_script_lexer.l: ld_script_parser.o
 
-GENSRCS=	amd64_script.c i386_script.c mips_script.c
+GENSRCS=	amd64_script.c i386_script.c littlemips_script.c bigmips_script.c
 
 CLEANFILES+=	${GENSRCS}
 

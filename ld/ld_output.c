@@ -113,7 +113,7 @@ ld_output_init(struct ld *ld)
 
 	eh.e_ident[EI_CLASS] = lo->lo_ec;
 	eh.e_ident[EI_DATA] = lo->lo_endian;
-	eh.e_flags = 0;		/* TODO */
+	eh.e_flags = ld->ld_arch->flags;
 	eh.e_machine = elftc_bfd_target_machine(ld->ld_otgt);
 	if (ld->ld_dso || ld->ld_pie)
 		eh.e_type = ET_DYN;

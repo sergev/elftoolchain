@@ -30,6 +30,8 @@ elfdump/elfdump
 findtextrel/findtextrel
 ld/amd64_script.c
 ld/i386_script.c
+ld/bigmips_script.c
+ld/littlemips_script.c
 ld/ld
 ld/ld_script_lexer.c
 ld/ld_script_parser.c

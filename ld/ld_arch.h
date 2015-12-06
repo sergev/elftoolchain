@@ -47,11 +47,13 @@ struct ld_arch {
 	void (*finalize_reloc)(struct ld *, struct ld_input_section *,
 	    struct ld_reloc_entry *);
 	void (*finalize_got_and_plt)(struct ld *);
+	void (*merge_flags)(struct ld *, unsigned flags);
 	int (*is_absolute_reloc)(uint64_t);
 	int (*is_relative_reloc)(uint64_t);
 	unsigned char reloc_is_64bit;
 	unsigned char reloc_is_rela;
 	size_t reloc_entsize;
+	unsigned flags;			/* processor-specific flags */
 	UT_hash_handle hh;
 	struct ld_arch *alias;
 };
@@ -62,4 +64,4 @@ struct ld_arch *ld_arch_find(struct ld *, char *);
 struct ld_arch *ld_arch_guess_arch_name(struct ld *, int, int);
 void	ld_arch_set(struct ld *, char *);
 void	ld_arch_set_from_target(struct ld *);
-void	ld_arch_verify(struct ld *, const char *, int, int);
+void	ld_arch_verify(struct ld *, const char *, int, int, unsigned);
