@@ -885,7 +885,7 @@ ld_layout_insert_output_section(struct ld *ld, const char *name,
 		}
 
 		_os = STAILQ_NEXT(os, os_next);
-		if (_os == NULL &&
+		if (_os != NULL &&
 		    (_os->os_flags & SHF_ALLOC) != (flags & SHF_ALLOC))
 			break;
 	}
