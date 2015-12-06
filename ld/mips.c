@@ -69,6 +69,7 @@ _scan_reloc(struct ld *ld, struct ld_input_section *is,
 	case R_MIPS_32:
 	case R_MIPS_26:
 	case R_MIPS_PC16:
+	case R_MIPS_GPREL16:
 		break;
 
 	default:
@@ -85,6 +86,7 @@ _process_reloc(struct ld *ld, struct ld_input_section *is,
 	struct ld_output *lo = ld->ld_output;
 	uint32_t p, s;
 	int32_t a, v;
+	uint32_t gp = 0; //TODO
 
 	assert(lo != NULL);
 
@@ -106,14 +108,21 @@ _process_reloc(struct ld *ld, struct ld_input_section *is,
 	case R_MIPS_26:
 		/* Word address at lower 26 bits. */
 		s += (a & 0x3ffffff) << 2;
-		v = (a & ~0x3ffffff)| ((s >> 2) & 0x3ffffff);
+		v = (a & ~0x3ffffff) | ((s >> 2) & 0x3ffffff);
 		WRITE_32(buf + lre->lre_offset, v);
 		break;
 
 	case R_MIPS_PC16:
 		/* PC-relative word address at lower 16 bits. */
 		s += ((a & 0xffff) << 2) - p;
-		v = (a & ~0xffff)| ((s >> 2) & 0xffff);
+		v = (a & ~0xffff) | ((s >> 2) & 0xffff);
+		WRITE_32(buf + lre->lre_offset, v);
+		break;
+
+	case R_MIPS_GPREL16:
+		/* GP-relative byte address at lower 16 bits. */
+		s += (int16_t)(a & 0xffff) - gp;
+		v = (a & ~0xffff) | (s & 0xffff);
 		WRITE_32(buf + lre->lre_offset, v);
 		break;
 
