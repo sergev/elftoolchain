@@ -47,8 +47,8 @@ static void _scan_reloc(struct ld *ld, struct ld_input_section *is,
     struct ld_reloc_entry *lre);
 static struct ld_input_section *_find_and_create_got_section(struct ld *ld,
     int create);
-static struct ld_input_section *_find_and_create_gotplt_section(struct ld *ld,
-    int create);
+//static struct ld_input_section *_find_and_create_gotplt_section(struct ld *ld,
+//    int create);
 static struct ld_input_section *_find_and_create_plt_section(struct ld *ld,
     int create);
 static uint64_t _get_max_page_size(struct ld *ld);
@@ -181,6 +181,7 @@ _find_and_create_got_section(struct ld *ld, int create)
 	return (is);
 }
 
+#if 0
 static struct ld_input_section *
 _find_and_create_gotplt_section(struct ld *ld, int create)
 {
@@ -208,6 +209,7 @@ _find_and_create_gotplt_section(struct ld *ld, int create)
 
 	return (is);
 }
+#endif
 
 static struct ld_input_section *
 _find_and_create_plt_section(struct ld *ld, int create)
@@ -252,10 +254,10 @@ _reserve_got_entry(struct ld *ld, struct ld_symbol *lsb, int num)
 static void
 _reserve_gotplt_entry(struct ld *ld, struct ld_symbol *lsb)
 {
-	struct ld_input_section *is;
+	//struct ld_input_section *is;
 	//uint64_t off;
 
-	is = _find_and_create_gotplt_section(ld, 1);
+	//is = _find_and_create_gotplt_section(ld, 1);
 
 	/* Reserve a GOT entry for PLT. */
 	//off = ld_input_reserve_ibuf(is, 1);

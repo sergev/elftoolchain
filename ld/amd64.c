@@ -267,10 +267,10 @@ _reserve_got_entry(struct ld *ld, struct ld_symbol *lsb, int num)
 static void
 _reserve_gotplt_entry(struct ld *ld, struct ld_symbol *lsb)
 {
-	struct ld_input_section *is;
+	//struct ld_input_section *is;
 	//uint64_t off;
 
-	is = _find_and_create_gotplt_section(ld, 1);
+	//is = _find_and_create_gotplt_section(ld, 1);
 
 	/* Reserve a GOT entry for PLT. */
 	//off = ld_input_reserve_ibuf(is, 1);
