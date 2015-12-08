@@ -64,10 +64,8 @@ SECTIONS {
 	.eh_frame_hdr	: { *(.eh_frame_hdr) }
 	.eh_frame	: { KEEP(*(.eh_frame)) }
 	.gcc_except_table   : { *(.gcc_except_table) }
-	. = ALIGN (CONSTANT(COMMONPAGESIZE)) - ((CONSTANT(COMMONPAGESIZE) - .) & (CONSTANT(COMMONPAGESIZE) - 1));
-	. = DATA_SEGMENT_ALIGN (CONSTANT(COMMONPAGESIZE), CONSTANT(COMMONPAGESIZE));
-	. = ALIGN(32 / 8);
-	.tdata		: { *(.tdata .tdata.* .gnu.linkonce.td.*) }
+
+	.tdata		: ALIGN(4096) { *(.tdata .tdata.* .gnu.linkonce.td.*) }
 	.tbss		: { *(.tbss .tbss.* .gnu.linkonce.tb.*) *(.tcommon) }
 	PROVIDE(__preinit_array_start = .);
 	.preinit_array	: { *(.preinit_array) }
