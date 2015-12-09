@@ -107,10 +107,12 @@ SECTIONS {
 	{
 		*(.sdata .sdata.* .gnu.linkonce.s.*)
 	}
+	/* Align the end of data segment to page boundary. */
+	. = ALIGN(. != 0 ? 4096 : 1);
 	_edata = .;
 	PROVIDE(edata = .);
 	__bss_start = .;
-	.sbss           :
+	.sbss           : ALIGN(8)
 	{
 		*(.dynsbss)
 		*(.sbss .sbss.* .gnu.linkonce.sb.*)
