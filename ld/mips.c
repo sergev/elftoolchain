@@ -70,6 +70,8 @@ _scan_reloc(struct ld *ld, struct ld_input_section *is,
 	case R_MIPS_26:
 	case R_MIPS_PC16:
 	case R_MIPS_GPREL16:
+	case R_MIPS_HI16:
+	case R_MIPS_LO16:
 		break;
 
 	default:
@@ -124,6 +126,14 @@ _process_reloc(struct ld *ld, struct ld_input_section *is,
 		s += (int16_t)(a & 0xffff) - gp;
 		v = (a & ~0xffff) | (s & 0xffff);
 		WRITE_32(buf + lre->lre_offset, v);
+		break;
+
+	case R_MIPS_HI16:
+		//TODO
+		break;
+
+	case R_MIPS_LO16:
+		//TODO
 		break;
 
 	default:

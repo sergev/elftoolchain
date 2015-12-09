@@ -141,5 +141,5 @@ SECTIONS {
 	.debug_loc	0 : { *(.debug_loc) }
 	.debug_macinfo	0 : { *(.debug_macinfo) }
 
-	/DISCARD/	: { *(.note.GNU-stack) }
+	/DISCARD/	: { *(.note.GNU-stack) *(.reginfo) }
 }
