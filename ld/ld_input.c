@@ -536,6 +536,12 @@ ld_input_init_sections(struct ld *ld, struct ld_input *li, Elf *e)
 			continue;
 		}
 
+		/* Discard MIPS .relinfo section */
+		if (is->is_type == SHT_MIPS_REGINFO) {
+			is->is_discard = 1;
+			continue;
+		}
+
 		/*
 		 * The content of input .eh_frame section is preloaded for
 		 * output .eh_frame optimization.
