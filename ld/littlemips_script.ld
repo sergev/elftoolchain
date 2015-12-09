@@ -103,6 +103,7 @@ SECTIONS {
 		SORT(CONSTRUCTORS)
 	}
 	.data1		: { *(.data1) }
+	_gp = ALIGN(16) + 0x7ff0;
 	.sdata          :
 	{
 		*(.sdata .sdata.* .gnu.linkonce.s.*)
