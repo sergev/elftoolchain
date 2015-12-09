@@ -170,6 +170,11 @@ ld_script_process_assign(struct ld *ld, struct ld_script_assign *lda)
 			    (uintmax_t) ls->ls_loc_counter,
 			    (uintmax_t) ldv->ldv_val);
 		ls->ls_loc_counter = (uint64_t) ldv->ldv_val;
+
+	} else if (ldv->ldv_symbol != NULL) {
+		ldv->ldv_symbol->lsb_value = ldv->ldv_val;
+		//TODO:	update symbol type
+//printf("--- %s() %s = %08x\n", __func__, var->le_name, (unsigned)ldv->ldv_val);
 	}
 	lda->lda_res = ldv->ldv_val;
 }
@@ -315,7 +320,7 @@ ld_script_cmd_free(struct ld_script_cmd *ldc)
 		ld_script_list_free(ldoi->ldoi_sec, ld_wildcard_free);
 		free(ldoi);
 		break;
-		
+
 	case LSC_SECTIONS_OVERLAY:
 		ldso2 = ldc->ldc_cmd;
 		ld_exp_free(ldso2->ldso_vma);
@@ -594,7 +599,7 @@ ld_script_version_add_node(struct ld *ld, char *ver, void *head, char *depend)
 
 	if ((ldvn = calloc(1, sizeof(*ldvn))) == NULL)
 		ld_fatal_std(ld, "calloc");
-	
+
 	ldvn->ldvn_name = ver;
 	if (ldvn->ldvn_name == NULL) {
 		/*
@@ -708,7 +713,7 @@ ld_script_version_set_lang(struct ld * ld,
 		}
 	}
 }
-    
+
 
 static void
 _input_file_add(struct ld *ld, struct ld_script_input_file *ldif)

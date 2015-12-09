@@ -171,6 +171,7 @@ ld_symbols_add_variable(struct ld *ld, struct ld_script_variable *ldv,
 	if (hidden)
 		lsb->lsb_other = STV_HIDDEN;
 	lsb->lsb_ref_ndso = 1;
+	ldv->ldv_symbol = lsb;
 
 	if (ld->ld_var_symbols == NULL) {
 		ld->ld_var_symbols = malloc(sizeof(*ld->ld_var_symbols));
