@@ -1,6 +1,6 @@
 /* $Id$ */
 
-OUTPUT_FORMAT("elf32-littlemips")
+OUTPUT_FORMAT("elf32-bigmips")
 ENTRY(_start)
 SEARCH_DIR("/lib"); SEARCH_DIR("/usr/lib");
 SECTIONS {
@@ -19,12 +19,14 @@ SECTIONS {
 		*(.rel.text .rel.text.* .rel.gnu.linkonce.t.*)
 		*(.rel.fini)
 		*(.rel.rodata .rel.rodata.* .rel.gnu.linkonce.r.*)
+		*(.rel.sdata .rel.sdata.* .rel.gnu.linkonce.s.*)
 		*(.rel.data .rel.data.* .rel.gnu.linkonce.d.*)
 		*(.rel.tdata .rel.tdata.* .rel.gnu.linkonce.td.*)
 		*(.rel.tbss .rel.tbss.* .rel.gnu.linkonce.tb.*)
 		*(.rel.ctors)
 		*(.rel.dtors)
 		*(.rel.got)
+		*(.rel.sbss .rel.sbss.* .rel.gnu.linkonce.sb.*)
 		*(.rel.bss .rel.bss.* .rel.gnu.linkonce.b.*)
 	}
 	.rela.dyn	:
@@ -33,12 +35,14 @@ SECTIONS {
 		*(.rela.text .rela.text.* .rela.gnu.linkonce.t.*)
 		*(.rela.fini)
 		*(.rela.rodata .rela.rodata.* .rela.gnu.linkonce.r.*)
+		*(.rela.sdata .rela.sdata.* .rela.gnu.linkonce.s.*)
 		*(.rela.data .rela.data.* .rela.gnu.linkonce.d.*)
 		*(.rela.tdata .rela.tdata.* .rela.gnu.linkonce.td.*)
 		*(.rela.tbss .rela.tbss.* .rela.gnu.linkonce.tb.*)
 		*(.rela.ctors)
 		*(.rela.dtors)
 		*(.rela.got)
+		*(.rela.sbss .rela.sbss.* .rela.gnu.linkonce.sb.*)
 		*(.rela.bss .rela.bss.* .rela.gnu.linkonce.b.*)
 	}
 	.rel.plt	: { *(.rel.plt) }
@@ -99,9 +103,19 @@ SECTIONS {
 		SORT(CONSTRUCTORS)
 	}
 	.data1		: { *(.data1) }
+	.sdata          :
+	{
+		*(.sdata .sdata.* .gnu.linkonce.s.*)
+	}
 	_edata = .;
 	PROVIDE(edata = .);
 	__bss_start = .;
+	.sbss           :
+	{
+		*(.dynsbss)
+		*(.sbss .sbss.* .gnu.linkonce.sb.*)
+		*(.scommon)
+	}
 	.bss		:
 	{
 		*(.dynbss)
