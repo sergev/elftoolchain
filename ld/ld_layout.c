@@ -1104,6 +1104,17 @@ _calc_output_section_offset(struct ld *ld, struct ld_output_section *os)
 	addr = ls->ls_loc_counter;
 
 	/*
+	 * Properly align section vma and offset to the required section
+	 * alignment.
+	 */
+
+	if ((os->os_flags & SHF_ALLOC) != 0 && !ld->ld_reloc) {
+		if (os->os_ldso == NULL || os->os_ldso->ldso_vma == NULL)
+			os->os_addr = roundup(addr, os->os_align);
+	} else
+		os->os_addr = 0;
+
+	/*
 	 * Location counter when refered inside an output section descriptor,
 	 * is an offset relative to the start of the section.
 	 */
@@ -1163,17 +1174,6 @@ _calc_output_section_offset(struct ld *ld, struct ld_output_section *os)
 			break;
 		}
 	}
-
-	/*
-	 * Properly align section vma and offset to the required section
-	 * alignment.
-	 */
-
-	if ((os->os_flags & SHF_ALLOC) != 0 && !ld->ld_reloc) {
-		if (os->os_ldso == NULL || os->os_ldso->ldso_vma == NULL)
-			os->os_addr = roundup(addr, os->os_align);
-	} else
-		os->os_addr = 0;
 
 	os->os_off = roundup(ls->ls_offset, os->os_align);
 	os->os_size = ls->ls_loc_counter;

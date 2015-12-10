@@ -758,7 +758,7 @@ sections_sub_command
 output_sections_desc
 	: ident output_section_addr_and_type ':' {
 		/* Remember the name of last output section, needed later for assignment. */
-		ld->ld_scp->lds_last_os_name = $1;
+		ld->ld_scp->lds_base_os_name = $1;
 	}
 	output_section_lma
 	output_section_align
@@ -785,6 +785,8 @@ output_sections_desc
 		$$->ldso_phdr = ld_script_list_reverse($14);
 		$$->ldso_fill = $15;
 		STAILQ_INIT(&ldso_c);
+		ld->ld_scp->lds_base_os_name = 0;
+		ld->ld_scp->lds_last_os_name = $1;
 	}
 	;
 
