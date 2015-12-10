@@ -30,6 +30,7 @@
 #include "ld_script.h"
 #include "ld_file.h"
 #include "ld_symbols.h"
+#include "ld_output.h"
 
 ELFTC_VCSID("$Id$");
 
@@ -173,8 +174,24 @@ ld_script_process_assign(struct ld *ld, struct ld_script_assign *lda)
 
 	} else if (ldv->ldv_symbol != NULL) {
 		ldv->ldv_symbol->lsb_value = ldv->ldv_val;
-		//TODO:	update symbol type
 //printf("--- %s() %s = %08x\n", __func__, var->le_name, (unsigned)ldv->ldv_val);
+		if (ldv->ldv_os_name) {
+			/* Bind the symbol to the last section. */
+			struct ld_output_section *os, *last = 0;
+
+			STAILQ_FOREACH(os, &ld->ld_output->lo_oslist, os_next) {
+				if (! os->os_empty)
+					last = os;
+				if (strcmp(os->os_name, ldv->ldv_os_name) == 0) {
+					if (last) {
+						ldv->ldv_symbol->lsb_shndx = elf_ndxscn(last->os_scn);
+//printf("---     Bind to section '%s' #%u\n", last->os_name, ldv->ldv_symbol->lsb_shndx);
+					}
+					ldv->ldv_os_name = 0;
+					break;
+				}
+			}
+		}
 	}
 	lda->lda_res = ldv->ldv_val;
 }

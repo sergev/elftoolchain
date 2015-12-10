@@ -54,6 +54,7 @@ SECTIONS {
 	.plt		: { *(.plt) }
 	.text		:
 	{
+		_ftext = .;
 		*(.text .stub .text.* .gnu.linkonce.t.*)
 	} = 0x00000000
 	.fini		:
@@ -99,6 +100,7 @@ SECTIONS {
 	.got		: { *(.got.plt) *(.got) }
 	.data		:
 	{
+		_fdata = .;
 		*(.data .data.* .gnu.linkonce.d.*)
 		SORT(CONSTRUCTORS)
 	}
@@ -113,6 +115,7 @@ SECTIONS {
 	_edata = .;
 	PROVIDE(edata = .);
 	__bss_start = .;
+	_fbss = .;
 	.sbss           : ALIGN(8)
 	{
 		*(.dynsbss)
