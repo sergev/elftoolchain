@@ -1,6 +1,5 @@
 /*-
- * Copyright (c) 2012,2013 Kai Wang
- * All rights reserved.
+ * Copyright (c) 2015 Serge Vakulenko
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -61,8 +60,6 @@ static void
 _scan_reloc(struct ld *ld, struct ld_input_section *is,
     struct ld_reloc_entry *lre)
 {
-	//struct ld_symbol *lsb = ld_symbols_ref(lre->lre_sym);
-
 	switch (lre->lre_type) {
 
 	case R_MIPS_NONE:
