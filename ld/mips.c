@@ -88,7 +88,8 @@ _process_reloc(struct ld *ld, struct ld_input_section *is,
 	struct ld_output *lo = ld->ld_output;
 	uint32_t p, s;
 	int32_t a, v;
-	uint32_t gp = 0; //TODO
+	static uint64_t _gp;
+	static char gp_name[] = "_gp";
 
 	assert(lo != NULL);
 
@@ -123,7 +124,10 @@ _process_reloc(struct ld *ld, struct ld_input_section *is,
 
 	case R_MIPS_GPREL16:
 		/* GP-relative byte address at lower 16 bits. */
-		s += (int16_t)(a & 0xffff) - gp;
+		if (! _gp && ld_symbols_get_value(ld, gp_name, &_gp) < 0)
+			ld_fatal(ld, "symbol _gp is undefined");
+
+		s += (int16_t)(a & 0xffff) - _gp;
 		v = (a & ~0xffff) | (s & 0xffff);
 		WRITE_32(buf + lre->lre_offset, v);
 		break;
