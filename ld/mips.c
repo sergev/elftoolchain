@@ -86,14 +86,14 @@ _process_reloc(struct ld *ld, struct ld_input_section *is,
     struct ld_reloc_entry *lre, struct ld_symbol *lsb, uint8_t *buf)
 {
 	struct ld_output *lo = ld->ld_output;
-	uint32_t p, s;
-	int32_t a, v;
-	static uint64_t _gp;
+	uint32_t pc, s;
+	int32_t a, v, la;
+	static uint64_t gp;
 	static char gp_name[] = "_gp";
 
 	assert(lo != NULL);
 
-	p = lre->lre_offset + is->is_output->os_addr + is->is_reloff;
+	pc = lre->lre_offset + is->is_output->os_addr + is->is_reloff;
 	s = (uint32_t) lsb->lsb_value;
 	READ_32(buf + lre->lre_offset, a);
 
@@ -117,27 +117,37 @@ _process_reloc(struct ld *ld, struct ld_input_section *is,
 
 	case R_MIPS_PC16:
 		/* PC-relative word address at lower 16 bits. */
-		s += ((a & 0xffff) << 2) - p;
+		s += ((a & 0xffff) << 2) - pc;
 		v = (a & ~0xffff) | ((s >> 2) & 0xffff);
 		WRITE_32(buf + lre->lre_offset, v);
 		break;
 
 	case R_MIPS_GPREL16:
 		/* GP-relative byte address at lower 16 bits. */
-		if (! _gp && ld_symbols_get_value(ld, gp_name, &_gp) < 0)
+		if (! gp && ld_symbols_get_value(ld, gp_name, &gp) < 0)
 			ld_fatal(ld, "symbol _gp is undefined");
 
-		s += (int16_t)(a & 0xffff) - _gp;
+		s += (int16_t)(a & 0xffff) - gp;
 		v = (a & ~0xffff) | (s & 0xffff);
 		WRITE_32(buf + lre->lre_offset, v);
 		break;
 
 	case R_MIPS_HI16:
-		//TODO
+		/* 16-bit high part of address pair. */
+		if (! STAILQ_NEXT(lre, lre_next) ||
+		    STAILQ_NEXT(lre, lre_next)->lre_type != R_MIPS_LO16)
+			ld_fatal(ld, "no LO16 after HI16 relocation");
+		READ_32(buf + STAILQ_NEXT(lre, lre_next)->lre_offset, la);
+		s += (a << 16) + (int16_t)la;
+		v = (a & ~0xffff) | (((s - (int16_t)s) >> 16) & 0xffff);
+		WRITE_32(buf + lre->lre_offset, v);
 		break;
 
 	case R_MIPS_LO16:
-		//TODO
+		/* 16-bit low part of address pair. */
+		s += (int16_t)a;
+		v = (a & ~0xffff) | (s & 0xffff);
+		WRITE_32(buf + lre->lre_offset, v);
 		break;
 
 	default:
